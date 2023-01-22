@@ -11,6 +11,7 @@ from architecture import *
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow import keras
+import matplotlib.pyplot as plt
 
 autotune = tf.data.experimental.AUTOTUNE
 tf.random.set_seed(seed)
@@ -71,7 +72,7 @@ class EveryKCallback(keras.callbacks.Callback):
             self.model.save_weights("ckpts/ckpt"+str(epoch), overwrite=True, save_format='h5')
             #self.model.save('network',overwrite=True)
 
-network.fit(
+history = network.fit(
     ds,
     epochs=epochs,
     verbose=1,
@@ -83,5 +84,22 @@ network.fit(
     validation_steps=x_test.shape[0]//batch_size,
     validation_data=ds_valid
 )
+
 network.save_weights("ckpts/finished", overwrite=True, save_format='h5')
 network.save('network',overwrite=True)
+
+def visualize_loss(history, title):
+    loss = history.history["loss"]
+    val_loss = history.history["val_loss"]
+    epochs = range(len(loss))
+    plt.figure()
+    plt.plot(epochs, loss, "b", label="Training loss")
+    plt.plot(epochs, val_loss, "r", label="Validation loss")
+    plt.title(title)
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.savefig('trainingHistory.png', dpi=100)
+    plt.show()
+
+visualize_loss(history, "Training and Validation Loss")
