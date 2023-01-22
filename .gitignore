@@ -4,5 +4,9 @@
 # github lol
 /galaxy-zoo-the-galaxy-challenge
 
+# also don't save the models:
+/ckpts
+/network
+
 /__pycache__
 example.png

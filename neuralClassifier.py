@@ -1,16 +1,22 @@
 # Author: Jacob Dawson
 #
-# Goal: classify the images of the galaxy zoo dataset!
+# Goal: make a nn to classify the images of the galaxy zoo dataset!
 
+###############################################################################
+# imports and constants
 import pandas as pd
 import numpy as np
 from constants import *
+from architecture import *
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow import keras
 
 autotune = tf.data.experimental.AUTOTUNE
 tf.random.set_seed(seed)
+
+###############################################################################
+# load and preprocess:
 
 df = pd.read_csv(trainingCsv)
 
@@ -25,7 +31,7 @@ def preprocess_image(image, augment_flag=False):
     if augment_flag:
         image = tf.image.random_flip_left_right(image)
         image = tf.image.random_flip_up_down(image)
-    image /= 255  # to [0,1] range
+    #image /= 255  # to [0,1] range
 
     return image
 def load_and_preprocess_image(path):
@@ -46,3 +52,36 @@ image_ds_valid = path_ds_valid.map(load_and_preprocess_image, num_parallel_calls
 label_ds_valid = tf.data.Dataset.from_tensor_slices(tf.cast(y_test, tf.float32))
 ds_valid = tf.data.Dataset.zip((image_ds_valid, label_ds_valid))
 ds_valid = ds_valid.batch(batch_size)
+
+###############################################################################
+# Model time!
+network = convNet()
+network.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=learnRate),
+    loss=tf.keras.losses.MeanSquaredError(),
+    metrics=['acc'],
+    #run_eagerly=True,
+)
+
+class EveryKCallback(keras.callbacks.Callback):
+    def __init__(self,epoch_interval=5):
+        self.epoch_interval = epoch_interval
+    def on_epoch_begin(self,epoch,logs=None):
+        if ((epoch % self.epoch_interval)==0):
+            self.model.save_weights("ckpts/ckpt"+str(epoch), overwrite=True, save_format='h5')
+            #self.model.save('network',overwrite=True)
+
+network.fit(
+    ds,
+    epochs=epochs,
+    verbose=1,
+    callbacks=[EveryKCallback(epoch_interval=5)], # custom callbacks here!
+    shuffle=False, # shuffling done via dataset api,
+    steps_per_epoch=x_train.shape[0]//batch_size,
+    #use_multiprocessing=True,
+    #workers=8, 
+    validation_steps=x_test.shape[0]//batch_size,
+    validation_data=ds_valid
+)
+network.save_weights("ckpts/finished", overwrite=True, save_format='h5')
+network.save('network',overwrite=True)
