@@ -1,0 +1,5 @@
+# Author: Jacob Dawson
+
+# the most important thing is that we don't want to upload ~3 GBs of data to
+# github lol
+/galaxy-zoo-the-galaxy-challenge
