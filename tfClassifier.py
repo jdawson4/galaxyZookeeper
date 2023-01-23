@@ -100,6 +100,6 @@ def visualize_loss(history, title):
     plt.ylabel("Loss")
     plt.legend()
     plt.savefig('trainingHistory.png', dpi=100)
-    plt.show()
+    #plt.show()
 
 visualize_loss(history, "Training and Validation Loss")
