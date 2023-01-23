@@ -22,7 +22,6 @@ def downsample(input, filters, apply_batchnorm=True):
     out = keras.layers.Activation('selu')(out)
     return keras.layers.AveragePooling2D()(out)
 
-
 # link the above layers into a dense block!
 def denseBlock(input, filters, size, apply_batchnorm=True):
     # how many layers do we want per dense block?
@@ -34,12 +33,27 @@ def denseBlock(input, filters, size, apply_batchnorm=True):
 
     return downsample(l5, filters=filters, apply_batchnorm=apply_batchnorm)
 
+# conv, batchnorm, and activation
+def simpleBlock(input, filters, size, stride, apply_batchnorm=True, apply_dropout=True):
+    out = keras.layers.Conv2D(filters, kernel_size=size, strides=stride, padding='same')(input)
+    out = keras.layers.Activation('selu')(out)
+    if apply_batchnorm:
+        out = keras.layers.BatchNormalization()(out)
+    if apply_dropout:
+        out = keras.layers.Dropout(0.25)(out)
+    return keras.layers.AveragePooling2D()(out)
+
 def convNet():
     input = keras.layers.Input(shape=(image_size,image_size,num_channels), dtype=tf.float16)
     scale = keras.layers.Rescaling(1.0/255.0, offset=0)(input)
-    out = denseBlock(scale, filters=4, size=3, apply_batchnorm=False)
-    out = denseBlock(out, filters=16, size=3, apply_batchnorm=True)
-    out = denseBlock(out, filters=64, size=3, apply_batchnorm=True)
+    #out = denseBlock(scale, filters=4, size=3, apply_batchnorm=False)
+    #out = denseBlock(out, filters=16, size=3, apply_batchnorm=True)
+    #out = denseBlock(out, filters=64, size=3, apply_batchnorm=True)
+    out = simpleBlock(scale, 4, 3, 1, apply_batchnorm=False, apply_dropout=True)
+    out = simpleBlock(out, 8, 3, 1, apply_batchnorm=True, apply_dropout=True)
+    out = simpleBlock(out, 16, 3, 1, apply_batchnorm=True, apply_dropout=True)
+    out = simpleBlock(out, 32, 3, 1, apply_batchnorm=True, apply_dropout=True)
+    out = simpleBlock(out, 64, 3, 1, apply_batchnorm=True, apply_dropout=True)
     #out = keras.layers.Flatten()(out)
     out = keras.layers.GlobalAveragePooling2D()(out)
     out = keras.layers.Dense(output_options,activation=None)(out) # what activation should we use here?

@@ -60,7 +60,7 @@ network = convNet()
 network.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=learnRate),
     loss=tf.keras.losses.MeanSquaredError(),
-    metrics=['acc'],
+    metrics=[tf.keras.metrics.RootMeanSquaredError()],
     #run_eagerly=True,
 )
 
