@@ -15,13 +15,19 @@ import matplotlib.pyplot as plt
 
 autotune = tf.data.experimental.AUTOTUNE
 tf.random.set_seed(seed)
+keras.mixed_precision.set_global_policy('mixed_float16')
 
 ###############################################################################
 # load and preprocess:
 
 df = pd.read_csv(trainingCsv)
 
-(x_train, x_test, y_train, y_test) = train_test_split(df.values[:,0].astype(int).astype(str), df.values[:,1:], test_size=0.2, random_state=0)
+(x_train, x_test, y_train, y_test) = train_test_split(
+    df.values[:,0].astype(int).astype(str),
+    df.values[:,1:],
+    test_size=0.2,
+    random_state=seed
+)
 # x_train is a list of ids, y_train is the list of target predictions
 
 # I found an example of some good preprocessing code here:
@@ -76,13 +82,13 @@ history = network.fit(
     ds,
     epochs=epochs,
     verbose=1,
-    callbacks=[EveryKCallback(epoch_interval=5)], # custom callbacks here!
-    shuffle=False, # shuffling done via dataset api,
+    callbacks=[EveryKCallback(epoch_interval=2)], # custom callbacks here!
+    shuffle=False,
     steps_per_epoch=x_train.shape[0]//batch_size,
     #use_multiprocessing=True,
-    #workers=8, 
+    #workers=8,
     validation_steps=x_test.shape[0]//batch_size,
-    validation_data=ds_valid
+    validation_data=ds_valid,
 )
 
 network.save_weights("ckpts/finished", overwrite=True, save_format='h5')
@@ -99,7 +105,7 @@ def visualize_loss(history, title):
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.legend()
-    plt.savefig('trainingHistory.png', dpi=100)
+    plt.savefig('trainingHistory.png', dpi=600)
     #plt.show()
 
 visualize_loss(history, "Training and Validation Loss")

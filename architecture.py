@@ -28,10 +28,10 @@ def denseBlock(input, filters, size, apply_batchnorm=True):
     l1 = layer(input, filters=filters, size=size, stride=1, apply_batchnorm=apply_batchnorm)
     l2 = layer(keras.layers.Concatenate()([input,l1]), filters=filters, size=size, stride=1, apply_batchnorm=apply_batchnorm)
     l3 = layer(keras.layers.Concatenate()([input,l1,l2]), filters=filters, size=size, stride=1, apply_batchnorm=apply_batchnorm)
-    l4 = layer(keras.layers.Concatenate()([input,l1,l2,l3]), filters=filters, size=size, stride=1, apply_batchnorm=apply_batchnorm)
-    l5 = layer(keras.layers.Concatenate()([input,l1,l2,l3,l4]), filters=filters, size=size, stride=1, apply_batchnorm=apply_batchnorm)
+    #l4 = layer(keras.layers.Concatenate()([input,l1,l2,l3]), filters=filters, size=size, stride=1, apply_batchnorm=apply_batchnorm)
+    #l5 = layer(keras.layers.Concatenate()([input,l1,l2,l3,l4]), filters=filters, size=size, stride=1, apply_batchnorm=apply_batchnorm)
 
-    return downsample(l5, filters=filters, apply_batchnorm=apply_batchnorm)
+    return downsample(l3, filters=filters, apply_batchnorm=apply_batchnorm)
 
 # conv, batchnorm, and activation
 def simpleBlock(input, filters, size, stride, apply_batchnorm=True, apply_dropout=True):
@@ -46,15 +46,23 @@ def simpleBlock(input, filters, size, stride, apply_batchnorm=True, apply_dropou
 def convNet():
     input = keras.layers.Input(shape=(image_size,image_size,num_channels), dtype=tf.float16)
     scale = keras.layers.Rescaling(1.0/255.0, offset=0)(input)
-    #out = denseBlock(scale, filters=4, size=3, apply_batchnorm=False)
-    #out = denseBlock(out, filters=16, size=3, apply_batchnorm=True)
-    #out = denseBlock(out, filters=64, size=3, apply_batchnorm=True)
-    out = simpleBlock(scale, 4, 3, 1, apply_batchnorm=False, apply_dropout=True)
-    out = simpleBlock(out, 8, 3, 1, apply_batchnorm=True, apply_dropout=True)
+    
+    # dense net solution:
+    out = denseBlock(scale, filters=8, size=3, apply_batchnorm=False)
+    out = denseBlock(out, filters=16, size=3, apply_batchnorm=True)
+    out = denseBlock(out, filters=32, size=3, apply_batchnorm=True)
+    out = denseBlock(out, filters=64, size=3, apply_batchnorm=True)
+    out = denseBlock(out, filters=128, size=3, apply_batchnorm=True)
+    
+    # simpler solution:
+    '''
+    out = simpleBlock(scale, 8, 3, 1, apply_batchnorm=False, apply_dropout=True)
     out = simpleBlock(out, 16, 3, 1, apply_batchnorm=True, apply_dropout=True)
     out = simpleBlock(out, 32, 3, 1, apply_batchnorm=True, apply_dropout=True)
     out = simpleBlock(out, 64, 3, 1, apply_batchnorm=True, apply_dropout=True)
-    #out = keras.layers.Flatten()(out)
+    out = simpleBlock(out, 128, 3, 1, apply_batchnorm=True, apply_dropout=False)
+    '''
+    
     out = keras.layers.GlobalAveragePooling2D()(out)
     out = keras.layers.Dense(output_options,activation=None)(out) # what activation should we use here?
     return keras.Model(inputs=input, outputs=out, name='classifier')
