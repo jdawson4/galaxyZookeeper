@@ -4,7 +4,7 @@ Found a "galaxy zoo" dataset on kaggle, thought I'd play around with it! The dat
 I'd like to note that I have the following organization of files:  
 |galaxyZookeeper--> README.md (this file)  
 |-----------------> (all the other files of this repo)  
-|-----------------> galaxy-zoo-the-galaxy-challenge  -> all_ones_benchmark--------> all_ones_benchmark.csv  
+|-----------------> galaxy-zoo-the-galaxy-challenge---> all_ones_benchmark--------> all_ones_benchmark.csv  
 |-----------------------------------------------------> all_zeros_benchmark-------> all_zeros_benchmark.csv  
 |-----------------------------------------------------> central_pixel_benchmark---> central_pixel_benchmark.csv  
 |-----------------------------------------------------> images_test_rev1----------> _tons of jpgs_  
