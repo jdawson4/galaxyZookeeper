@@ -45,10 +45,9 @@ def simpleBlock(input, filters, size, stride, apply_batchnorm=True, apply_dropou
 
 def convNet():
     input = keras.layers.Input(shape=(image_size,image_size,num_channels), dtype=tf.float16)
-    scale = keras.layers.Rescaling(1.0/255.0, offset=0)(input)
     
     # dense net solution:
-    out = denseBlock(scale, filters=8, size=3, apply_batchnorm=False)
+    out = denseBlock(input, filters=8, size=3, apply_batchnorm=False)
     out = denseBlock(out, filters=16, size=3, apply_batchnorm=True)
     out = denseBlock(out, filters=32, size=3, apply_batchnorm=True)
     out = denseBlock(out, filters=64, size=3, apply_batchnorm=True)
@@ -56,7 +55,7 @@ def convNet():
     
     # simpler solution:
     '''
-    out = simpleBlock(scale, 8, 3, 1, apply_batchnorm=False, apply_dropout=True)
+    out = simpleBlock(input, 8, 3, 1, apply_batchnorm=False, apply_dropout=True)
     out = simpleBlock(out, 16, 3, 1, apply_batchnorm=True, apply_dropout=True)
     out = simpleBlock(out, 32, 3, 1, apply_batchnorm=True, apply_dropout=True)
     out = simpleBlock(out, 64, 3, 1, apply_batchnorm=True, apply_dropout=True)
@@ -64,7 +63,7 @@ def convNet():
     '''
     
     out = keras.layers.GlobalAveragePooling2D()(out)
-    out = keras.layers.Dense(output_options,activation=None)(out) # what activation should we use here?
+    out = keras.layers.Dense(output_options,activation='sigmoid')(out) # what activation should we use here?
     return keras.Model(inputs=input, outputs=out, name='classifier')
 
 if __name__ == '__main__':

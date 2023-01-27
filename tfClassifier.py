@@ -5,7 +5,7 @@
 ###############################################################################
 # imports and constants
 import pandas as pd
-import numpy as np
+#import numpy as np
 from constants import *
 from architecture import *
 from sklearn.model_selection import train_test_split
@@ -38,7 +38,7 @@ def preprocess_image(image, augment_flag=False):
     if augment_flag:
         image = tf.image.random_flip_left_right(image)
         image = tf.image.random_flip_up_down(image)
-    #image /= 255  # to [0,1] range
+    image /= 255  # to [0,1] range
 
     return image
 def load_and_preprocess_image(path):
@@ -63,12 +63,20 @@ ds_valid = ds_valid.batch(batch_size)
 ###############################################################################
 # Model time!
 network = convNet()
+network.summary()
 network.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=learnRate),
     loss=tf.keras.losses.MeanSquaredError(),
     metrics=[tf.keras.metrics.RootMeanSquaredError()],
     #run_eagerly=True,
 )
+
+# use this code if you have a prepared checkpoint to use for output:
+checkpoint = None
+if checkpoint!=None:
+    network.built=True
+    network.load_weights(checkpoint)
+    print("Checkpoint loaded, skipping training.")
 
 class EveryKCallback(keras.callbacks.Callback):
     def __init__(self,epoch_interval=5):
