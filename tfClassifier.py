@@ -4,11 +4,11 @@
 
 ###############################################################################
 # imports and constants
-import pandas as pd
+#import pandas as pd
 #import numpy as np
 from constants import *
 from architecture import *
-from sklearn.model_selection import train_test_split
+from preprocess import preprocess
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
@@ -17,48 +17,9 @@ autotune = tf.data.experimental.AUTOTUNE
 tf.random.set_seed(seed)
 keras.mixed_precision.set_global_policy('mixed_float16')
 
-###############################################################################
-# load and preprocess:
-
-df = pd.read_csv(trainingCsv)
-
-(x_train, x_test, y_train, y_test) = train_test_split(
-    df.values[:,0].astype(int).astype(str),
-    df.values[:,1:],
-    test_size=0.2,
-    random_state=seed
-)
-# x_train is a list of ids, y_train is the list of target predictions
-
-# I found an example of some good preprocessing code here:
-# https://www.kaggle.com/code/hironobukawaguchi/galaxy-zoo-xception
-def preprocess_image(image, augment_flag=False):
-    image = tf.image.decode_jpeg(image, channels=3)
-    image = tf.image.resize_with_crop_or_pad(image, image_size, image_size)
-    if augment_flag:
-        image = tf.image.random_flip_left_right(image)
-        image = tf.image.random_flip_up_down(image)
-    image /= 255  # to [0,1] range
-
-    return image
-def load_and_preprocess_image(path):
-    img_path = dataDirectory + path + '.jpg'
-    image = tf.io.read_file(img_path)
-    return preprocess_image(image, augment_flag=augmentFlag)
-
-path_ds = tf.data.Dataset.from_tensor_slices(x_train)
-image_ds = path_ds.map(load_and_preprocess_image, num_parallel_calls=autotune)
-label_ds = tf.data.Dataset.from_tensor_slices(tf.cast(y_train, tf.float32))
-ds = tf.data.Dataset.zip((image_ds, label_ds))
-ds = ds.apply(
-    tf.data.experimental.shuffle_and_repeat(buffer_size=bufferSize)
-)
-ds = ds.batch(batch_size)
-path_ds_valid = tf.data.Dataset.from_tensor_slices(x_test)
-image_ds_valid = path_ds_valid.map(load_and_preprocess_image, num_parallel_calls=autotune)
-label_ds_valid = tf.data.Dataset.from_tensor_slices(tf.cast(y_test, tf.float32))
-ds_valid = tf.data.Dataset.zip((image_ds_valid, label_ds_valid))
-ds_valid = ds_valid.batch(batch_size)
+# note: preprocessing done in preprocess.py. We return only what we intend to
+# use here.
+ds, ds_valid, x_train_shape, x_test_shape = preprocess(trainingCsv)
 
 ###############################################################################
 # Model time!
@@ -92,10 +53,10 @@ history = network.fit(
     verbose=1,
     callbacks=[EveryKCallback(epoch_interval=2)], # custom callbacks here!
     shuffle=False,
-    steps_per_epoch=x_train.shape[0]//batch_size,
+    steps_per_epoch=x_train_shape[0]//batch_size,
     #use_multiprocessing=True,
     #workers=8,
-    validation_steps=x_test.shape[0]//batch_size,
+    validation_steps=x_test_shape[0]//batch_size,
     validation_data=ds_valid,
 )
 
