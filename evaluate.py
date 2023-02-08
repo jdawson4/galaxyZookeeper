@@ -19,12 +19,18 @@ keras.mixed_precision.set_global_policy('mixed_float16')
 
 ds, _, x_train_shape, x_test_shape = preprocess(
     trainingCsv,
-    given_test_size=0.0
+    given_test_size=0.00000000000001
 )
 
 network = convNet()
+network.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=learnRate),
+    loss=tf.keras.losses.MeanSquaredError(),
+    metrics=[tf.keras.metrics.RootMeanSquaredError(), 'accuracy'],
+    #run_eagerly=True,
+)
 network.built=True
-network.load_weights(checkpointFolder + 'ckpt40')
+network.load_weights('ckpts/ckpt40')
 
 '''
 history = network.fit(
@@ -45,6 +51,7 @@ metrics = network.evaluate(
     ds,
     #batch_size=None, # data already batched
     return_dict=True,
+    steps=100 # this specifies the number of batches that we plan to look at
 )
 
 print(metrics)
