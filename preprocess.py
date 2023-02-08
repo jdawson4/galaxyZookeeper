@@ -31,13 +31,13 @@ def load_and_preprocess_image(path):
     image = tf.io.read_file(img_path)
     return preprocess_image(image, augment_flag=augmentFlag)
 
-def preprocess(csv):
+def preprocess(csv, given_test_size=0.2):
     df = pd.read_csv(csv)
 
     (x_train, x_test, y_train, y_test) = train_test_split(
         df.values[:,0].astype(int).astype(str),
         df.values[:,1:],
-        test_size=0.2,
+        test_size=given_test_size,
         random_state=seed
     )
     # x_train is a list of ids, y_train is the list of target predictions

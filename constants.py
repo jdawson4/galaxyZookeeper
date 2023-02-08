@@ -4,6 +4,7 @@
 seed = 7
 dataDirectory = "galaxy-zoo-the-galaxy-challenge/images_training_rev1/"
 trainingCsv = "galaxy-zoo-the-galaxy-challenge/training_solutions_rev1/training_solutions_rev1.csv"
+checkpointFolder = "ckpts/"
 batch_size = 64
 image_size = 424 # natively 424
 augmentFlag = False
