@@ -28,7 +28,7 @@ network.summary()
 network.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=learnRate),
     loss=tf.keras.losses.MeanSquaredError(),
-    metrics=[tf.keras.metrics.RootMeanSquaredError()],
+    metrics=[tf.keras.metrics.RootMeanSquaredError(), 'accuracy'],
     #run_eagerly=True,
 )
 
