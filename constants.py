@@ -13,3 +13,4 @@ num_channels = 3
 output_options = 37
 learnRate = 0.002 # adam's default is 0.001
 epochs = 100
+epoch_interval = 5

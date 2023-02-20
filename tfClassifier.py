@@ -40,7 +40,7 @@ if checkpoint!=None:
     print("Checkpoint loaded, skipping training.")
 
 class EveryKCallback(keras.callbacks.Callback):
-    def __init__(self,epoch_interval=5):
+    def __init__(self,epoch_interval=epoch_interval):
         self.epoch_interval = epoch_interval
     def on_epoch_begin(self,epoch,logs=None):
         if ((epoch % self.epoch_interval)==0):
