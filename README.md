@@ -10,3 +10,6 @@ I'd like to note that I have the following organization of files:
 |-----------------------------------------------------> images_test_rev1----------> _tons of jpgs_  
 |-----------------------------------------------------> images_training_rev1------> _tons of jpgs_  
 |-----------------------------------------------------> training_solutions_rev1---> training_solutions_rev1.csv  
+
+# Results
+Currently, I'm still tinkering around with the model, but my "first shot" trained for 40 epochs and it looks like we're getting somewhere around 50% accuracy or 0.04 MSE loss on some validation data. Not terrible, considering the number of classes we're attempting to classify on!
